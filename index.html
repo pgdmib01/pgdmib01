@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Portal</title>
+<link rel="stylesheet" href="https://unpkg.com/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #f5f4f1; --surface: #ffffff; --surface2: #f0efe9;
+    --border: rgba(0,0,0,0.1); --border-strong: rgba(0,0,0,0.18);
+    --text: #1a1a18; --text2: #5a5955; --text3: #8a8880;
+    --accent: #1d4ed8; --accent-bg: #eff6ff; --accent-border: #bfdbfe;
+    --green: #15803d; --green-bg: #f0fdf4; --green-border: #bbf7d0;
+    --amber: #92400e; --amber-bg: #fffbeb; --amber-border: #fde68a;
+    --red: #991b1b; --red-bg: #fef2f2; --red-border: #fecaca;
+    --orange: #9a3412; --orange-bg: #fff7ed; --orange-border: #fed7aa;
+    --purple: #3C3489; --purple-bg: #EEEDFE; --purple-border: #AFA9EC;
+    --radius: 10px; --radius-sm: 6px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+  }
+  body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; font-size: 15px; line-height: 1.6; }
+  header { background: var(--surface); border-bottom: 0.5px solid var(--border); padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; height: 60px; position: sticky; top: 0; z-index: 100; }
+  .logo { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 16px; color: var(--text); cursor: pointer; }
+  .logo-icon { width: 32px; height: 32px; background: var(--accent); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; color: white; font-size: 16px; }
+  .header-right { display: flex; align-items: center; gap: 12px; }
+  .avatar { width: 34px; height: 34px; background: var(--purple-bg); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: var(--purple); border: 1px solid var(--purple-border); }
+  .admin-btn { font-size: 13px; padding: 5px 12px; border: 0.5px solid var(--border-strong); border-radius: var(--radius-sm); background: var(--surface); color: var(--text2); cursor: pointer; display: flex; align-items: center; gap: 5px; transition: background 0.15s; }
+  .admin-btn:hover { background: var(--surface2); }
+  .admin-btn.active-admin { background: var(--accent); color: white; border-color: var(--accent); }
+  .layout { display: grid; grid-template-columns: 260px 1fr; min-height: calc(100vh - 60px); }
+  aside { background: var(--surface); border-right: 0.5px solid var(--border); padding: 1.5rem 1rem; overflow-y: auto; }
+  .sidebar-label { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text3); padding: 0 0.5rem; margin-bottom: 6px; margin-top: 1rem; }
+  .sidebar-label:first-child { margin-top: 0; }
+  .subject-btn { display: flex; align-items: center; gap: 9px; width: 100%; text-align: left; padding: 8px 10px; border-radius: var(--radius-sm); border: none; background: none; cursor: pointer; font-size: 13.5px; color: var(--text2); transition: background 0.12s, color 0.12s; line-height: 1.4; }
+  .subject-btn:hover { background: var(--surface2); color: var(--text); }
+  .subject-btn.active { background: var(--accent-bg); color: var(--accent); font-weight: 500; }
+  .subject-num { font-size: 11px; color: var(--text3); min-width: 18px; text-align: center; font-weight: 600; }
+  .subject-btn.active .subject-num { color: var(--accent); opacity: 0.7; }
+  main { padding: 2rem; overflow-y: auto; }
+  .home-header { margin-bottom: 1.5rem; }
+  .home-header h1 { font-size: 22px; font-weight: 600; }
+  .home-header p { color: var(--text2); font-size: 14px; margin-top: 3px; }
+  .section-title { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text3); margin-bottom: 12px; display: flex; align-items: center; gap: 7px; }
+  .announcements { display: flex; flex-direction: column; gap: 10px; margin-bottom: 2rem; }
+  .announcement-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 14px 16px; display: flex; align-items: flex-start; gap: 12px; box-shadow: var(--shadow); transition: border-color 0.2s, background 0.2s; }
+  .announcement-card.urgent   { border-color: var(--red-border);    background: var(--red-bg); }
+  .announcement-card.soon     { border-color: var(--orange-border);  background: var(--orange-bg); }
+  .announcement-card.upcoming { border-color: var(--amber-border);   background: var(--amber-bg); }
+  .ann-icon { width: 36px; height: 36px; flex-shrink: 0; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-size: 17px; }
+  .ann-icon.deadline { background: var(--red-bg);    color: var(--red);    border: 0.5px solid var(--red-border); }
+  .ann-icon.exam     { background: var(--amber-bg);  color: var(--amber);  border: 0.5px solid var(--amber-border); }
+  .ann-icon.quiz     { background: var(--purple-bg); color: var(--purple); border: 0.5px solid var(--purple-border); }
+  .ann-icon.info     { background: var(--accent-bg); color: var(--accent); border: 0.5px solid var(--accent-border); }
+  .ann-body { flex: 1; min-width: 0; }
+  .ann-body strong { font-size: 14px; font-weight: 500; display: block; }
+  .ann-desc { font-size: 13px; color: var(--text2); }
+  .ann-footer { display: flex; align-items: center; gap: 8px; margin-top: 6px; flex-wrap: wrap; }
+  .ann-date-text { font-size: 12px; color: var(--text3); display: flex; align-items: center; gap: 3px; }
+  .countdown-pill { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 99px; white-space: nowrap; }
+  .pill-urgent   { background: var(--red-bg);    color: var(--red);    border: 0.5px solid var(--red-border); }
+  .pill-soon     { background: var(--orange-bg);  color: var(--orange); border: 0.5px solid var(--orange-border); }
+  .pill-upcoming { background: var(--amber-bg);   color: var(--amber);  border: 0.5px solid var(--amber-border); }
+  .pill-future   { background: var(--green-bg);   color: var(--green);  border: 0.5px solid var(--green-border); }
+  .pill-past     { background: var(--surface2);   color: var(--text3);  border: 0.5px solid var(--border); }
+  .ann-badge { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 99px; white-space: nowrap; align-self: flex-start; margin-left: auto; flex-shrink: 0; }
+  .badge-red    { background: var(--red-bg);    color: var(--red);    border: 0.5px solid var(--red-border); }
+  .badge-amber  { background: var(--amber-bg);  color: var(--amber);  border: 0.5px solid var(--amber-border); }
+  .badge-purple { background: var(--purple-bg); color: var(--purple); border: 0.5px solid var(--purple-border); }
+  .badge-blue   { background: var(--accent-bg); color: var(--accent); border: 0.5px solid var(--accent-border); }
+  .overview-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+  .stat-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 14px 16px; box-shadow: var(--shadow); }
+  .stat-label { font-size: 12px; color: var(--text3); margin-bottom: 4px; }
+  .stat-value { font-size: 22px; font-weight: 600; }
+  .subject-view { display: none; }
+  .subject-view.visible { display: block; }
+  .subject-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
+  .subject-header h2 { font-size: 20px; font-weight: 600; }
+  .subject-header p { color: var(--text2); font-size: 14px; margin-top: 2px; }
+  /* Action cards */
+  .action-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; margin-bottom: 2rem; }
+  .action-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 20px; cursor: pointer; transition: box-shadow 0.15s, border-color 0.15s, transform 0.12s; color: inherit; display: flex; flex-direction: column; gap: 10px; box-shadow: var(--shadow); position: relative; }
+  .action-card:hover { border-color: var(--border-strong); box-shadow: 0 4px 12px rgba(0,0,0,0.1); transform: translateY(-1px); }
+  .action-card.disabled { opacity: 0.5; cursor: not-allowed; }
+  .action-card.disabled:hover { transform: none; box-shadow: var(--shadow); border-color: var(--border); }
+  .card-icon { width: 40px; height: 40px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-size: 20px; }
+  .action-card h3 { font-size: 14px; font-weight: 500; }
+  .action-card p  { font-size: 12.5px; color: var(--text2); line-height: 1.5; }
+  .card-arrow { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); color: var(--text3); font-size: 16px; transition: right 0.15s; }
+  .action-card:not(.disabled):hover .card-arrow { right: 12px; }
+  /* Admin drive config */
+  .drive-config { background: var(--surface); border: 0.5px solid var(--accent-border); border-radius: var(--radius); padding: 20px; margin-bottom: 2rem; box-shadow: var(--shadow); }
+  .drive-config-header { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .drive-config-header h3 { font-size: 14px; font-weight: 600; }
+  .admin-only-badge { font-size: 11px; font-weight: 600; padding: 2px 7px; border-radius: 99px; background: var(--accent-bg); color: var(--accent); border: 0.5px solid var(--accent-border); }
+  .drive-config p { font-size: 13px; color: var(--text2); margin-bottom: 14px; }
+  .drive-inputs { display: flex; flex-direction: column; gap: 10px; }
+  .drive-row { display: flex; gap: 8px; align-items: center; }
+  .drive-row label { font-size: 12.5px; color: var(--text2); min-width: 160px; flex-shrink: 0; }
+  .drive-row input { flex: 1; padding: 7px 10px; border: 0.5px solid var(--border-strong); border-radius: var(--radius-sm); font-size: 13px; background: var(--bg); color: var(--text); outline: none; transition: border-color 0.15s; min-width: 0; }
+  .drive-row input:focus { border-color: var(--accent); }
+  .drive-row input::placeholder { color: var(--text3); }
+  .save-btn { margin-top: 10px; padding: 7px 16px; background: var(--accent); color: white; border: none; border-radius: var(--radius-sm); font-size: 13px; font-weight: 500; cursor: pointer; transition: opacity 0.15s; display: inline-flex; align-items: center; gap: 6px; }
+  .save-btn:hover { opacity: 0.9; }
+  .save-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+  /* Modals */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 200; align-items: center; justify-content: center; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--surface); border-radius: var(--radius); padding: 24px; width: 480px; max-width: 95vw; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
+  .modal h3 { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
+  .modal > p { font-size: 13.5px; color: var(--text2); margin-bottom: 18px; }
+  .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 4px; }
+  .btn-ghost { padding: 7px 14px; background: none; border: 0.5px solid var(--border-strong); border-radius: var(--radius-sm); font-size: 13px; cursor: pointer; color: var(--text2); transition: background 0.12s; }
+  .btn-ghost:hover { background: var(--surface2); }
+  .drive-open-btn { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 14px; border-radius: var(--radius); border: 0.5px solid var(--accent-border); background: var(--accent); margin-bottom: 16px; text-decoration: none; color: white; font-size: 14px; font-weight: 500; transition: opacity 0.15s; }
+  .drive-open-btn:hover { opacity: 0.9; }
+  .drive-open-btn i { font-size: 20px; }
+  .drive-open-btn.not-set { background: var(--surface2); color: var(--text3); border-color: var(--border); cursor: not-allowed; pointer-events: none; }
+  .upload-area { border: 1.5px dashed var(--border-strong); border-radius: var(--radius); padding: 28px; text-align: center; cursor: pointer; margin-bottom: 16px; transition: border-color 0.15s, background 0.15s; }
+  .upload-area:hover { border-color: var(--accent); background: var(--accent-bg); }
+  .upload-area i { font-size: 32px; color: var(--text3); display: block; margin-bottom: 8px; }
+  .upload-area p { font-size: 13px; color: var(--text2); }
+  .upload-area span { font-size: 12px; color: var(--text3); }
+  #file-input { display: none; }
+  /* Admin panel */
+  .admin-panel { display: none; position: fixed; right: 0; top: 60px; width: 390px; height: calc(100vh - 60px); background: var(--surface); border-left: 0.5px solid var(--border); z-index: 150; overflow-y: auto; padding: 1.5rem; box-shadow: -8px 0 30px rgba(0,0,0,0.08); }
+  .admin-panel.open { display: block; }
+  .admin-panel h2 { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+  .admin-panel > p { font-size: 13px; color: var(--text2); margin-bottom: 1.5rem; }
+  .ann-form { display: flex; flex-direction: column; gap: 10px; }
+  .ann-form label { font-size: 12.5px; color: var(--text2); font-weight: 500; }
+  .ann-form input, .ann-form select, .ann-form textarea { padding: 8px 10px; border: 0.5px solid var(--border-strong); border-radius: var(--radius-sm); font-size: 13.5px; background: var(--bg); color: var(--text); outline: none; width: 100%; transition: border-color 0.15s; }
+  .ann-form input:focus, .ann-form select:focus, .ann-form textarea:focus { border-color: var(--accent); }
+  .ann-form textarea { resize: vertical; min-height: 70px; }
+  .ann-list { margin-top: 1.5rem; }
+  .ann-list h3 { font-size: 13px; font-weight: 600; color: var(--text2); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.06em; }
+  .admin-ann-item { display: flex; justify-content: space-between; align-items: flex-start; padding: 10px; border: 0.5px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 8px; background: var(--surface2); gap: 8px; }
+  .admin-ann-item p { font-size: 13px; font-weight: 500; }
+  .admin-ann-item span { font-size: 12px; color: var(--text3); }
+  .delete-ann { background: none; border: none; cursor: pointer; color: var(--text3); font-size: 16px; padding: 2px; transition: color 0.12s; flex-shrink: 0; }
+  .delete-ann:hover { color: var(--red); }
+  .home-view.hidden { display: none; }
+  .admin-bar { background: var(--accent); color: white; text-align: center; padding: 6px; font-size: 12.5px; font-weight: 500; letter-spacing: 0.03em; display: none; }
+  .admin-bar.show { display: block; }
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #1a1a18; color: white; padding: 10px 20px; border-radius: var(--radius); font-size: 13.5px; z-index: 999; opacity: 0; transition: opacity 0.2s; pointer-events: none; display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+  .toast.show { opacity: 1; }
+  .spinner { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; display: inline-block; flex-shrink: 0; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-bar { text-align: center; padding: 32px; color: var(--text3); font-size: 14px; }
+  @media (max-width: 700px) { .layout { grid-template-columns: 1fr; } aside { display: none; } main { padding: 1rem; } }
+</style>
+</head>
+<body>
+
+<div class="admin-bar" id="admin-bar">
+  <i class="ti ti-shield-check" style="vertical-align:-2px;margin-right:5px"></i>
+  Admin mode — Drive link editing is enabled
+  <button onclick="logoutAdmin()" style="margin-left:12px;background:rgba(255,255,255,0.2);border:none;color:white;padding:2px 10px;border-radius:4px;cursor:pointer;font-size:12px;">Log out</button>
+</div>
+
+<header>
+  <div class="logo" onclick="showHome()">
+    <div class="logo-icon"><i class="ti ti-school"></i></div>
+    Student Portal
+  </div>
+  <div class="header-right">
+    <button class="admin-btn" id="admin-toggle-btn" onclick="toggleAdmin()">
+      <i class="ti ti-settings" style="font-size:15px"></i> Admin
+    </button>
+    <div class="avatar">ST</div>
+  </div>
+</header>
+
+<div class="layout">
+  <aside>
+    <div class="sidebar-label">Subjects</div>
+    <div id="subject-list"></div>
+  </aside>
+  <main>
+    <!-- HOME -->
+    <div class="home-view" id="home-view">
+      <div class="home-header">
+        <h1>Welcome back 👋</h1>
+        <p id="date-display"></p>
+      </div>
+      <div class="section-title"><i class="ti ti-speakerphone" aria-hidden="true"></i> Announcements & Upcoming</div>
+      <div class="announcements" id="announcements-container">
+        <div class="loading-bar"><div class="spinner" style="margin:0 auto 8px;border-color:rgba(0,0,0,0.15);border-top-color:var(--accent);"></div>Loading announcements…</div>
+      </div>
+      <div class="section-title" style="margin-top:2rem;"><i class="ti ti-layout-grid" aria-hidden="true"></i> Quick overview</div>
+      <div class="overview-grid">
+        <div class="stat-card"><div class="stat-label">Total subjects</div><div class="stat-value">13</div></div>
+        <div class="stat-card"><div class="stat-label">Pending tasks</div><div class="stat-value" id="pending-count">—</div></div>
+        <div class="stat-card"><div class="stat-label">Upcoming exams</div><div class="stat-value" id="exam-count">—</div></div>
+        <div class="stat-card"><div class="stat-label">Quizzes this week</div><div class="stat-value" id="quiz-count">—</div></div>
+      </div>
+    </div>
+    <!-- SUBJECT -->
+    <div class="subject-view" id="subject-view">
+      <div class="subject-header">
+        <div><h2 id="subject-title"></h2><p id="subject-code"></p></div>
+        <span class="ann-badge badge-blue" style="font-size:12px;padding:4px 12px;border-radius:99px;">Active</span>
+      </div>
+      <div class="section-title"><i class="ti ti-bolt" aria-hidden="true"></i> Quick actions</div>
+      <div class="action-grid" id="action-grid"></div>
+      <!-- Admin-only drive config -->
+      <div class="drive-config" id="drive-config-section" style="display:none;">
+        <div class="drive-config-header">
+          <h3>Google Drive links</h3>
+          <span class="admin-only-badge"><i class="ti ti-shield-check" style="font-size:10px;vertical-align:-1px;margin-right:2px"></i>Admin only</span>
+        </div>
+        <p>Paste shareable Google Drive folder links for each action. Saved instantly for all students.</p>
+        <div class="drive-inputs" id="drive-inputs"></div>
+        <button class="save-btn" id="drive-save-btn" onclick="saveDriveLinks()">
+          <i class="ti ti-device-floppy"></i> Save links
+        </button>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Modal: Open folder (students) -->
+<div class="modal-overlay" id="modal-folder">
+  <div class="modal">
+    <h3 id="modal-folder-title">Course material</h3>
+    <p id="modal-folder-desc"></p>
+    <a class="drive-open-btn" id="modal-folder-link" href="#" target="_blank" rel="noopener" onclick="closeModal('modal-folder')">
+      <i class="ti ti-brand-google-drive"></i> Open in Google Drive
+    </a>
+    <div class="modal-actions"><button class="btn-ghost" onclick="closeModal('modal-folder')">Close</button></div>
+  </div>
+</div>
+
+<!-- Modal: Upload -->
+<div class="modal-overlay" id="modal-upload">
+  <div class="modal">
+    <h3><i class="ti ti-upload" style="vertical-align:-2px;margin-right:6px"></i>Upload assignment</h3>
+    <p>Click below to open the submission folder in Google Drive, then upload your file there.</p>
+    <a class="drive-open-btn" id="modal-upload-link" href="#" target="_blank" rel="noopener" onclick="closeModal('modal-upload')">
+      <i class="ti ti-brand-google-drive"></i> Open submission folder
+    </a>
+    <div class="upload-area" id="upload-area-click">
+      <i class="ti ti-cloud-upload" aria-hidden="true"></i>
+      <p>Or click here to select a file first</p>
+      <span>We'll open the Drive folder so you can upload it</span>
+    </div>
+    <input type="file" id="file-input" onchange="handleFileSelect(event)">
+    <div class="modal-actions"><button class="btn-ghost" onclick="closeModal('modal-upload')">Close</button></div>
+  </div>
+</div>
+
+<!-- Admin Panel -->
+<div class="admin-panel" id="admin-panel">
+  <h2><i class="ti ti-speakerphone" style="vertical-align:-2px;margin-right:6px"></i>Announcements</h2>
+  <p>Add or remove announcements. Changes go live for all students instantly.</p>
+  <div class="ann-form">
+    <label>Title</label>
+    <input type="text" id="ann-title" placeholder="e.g. Mid-term exam — International Finance">
+    <label>Description</label>
+    <textarea id="ann-desc" placeholder="e.g. Covers chapters 1–5. Closed-book."></textarea>
+    <label>Due / Exam date</label>
+    <input type="date" id="ann-date">
+    <label>Type</label>
+    <select id="ann-type">
+      <option value="deadline">Assignment deadline</option>
+      <option value="exam">Mid-term / Final exam</option>
+      <option value="quiz">Quiz</option>
+      <option value="info">General info</option>
+    </select>
+    <button class="save-btn" id="ann-add-btn" onclick="addAnnouncement()">
+      <i class="ti ti-plus"></i> Add announcement
+    </button>
+  </div>
+  <div class="ann-list">
+    <h3>Active announcements</h3>
+    <div id="admin-ann-list"><div class="loading-bar" style="padding:16px;">Loading…</div></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API   = "https://script.google.com/macros/s/AKfycbw0z-iEFsnRAeXPVPA2jno7sH6lH5D1s8O29SWj2qMauJVJJYAqIZ4gTd0LAY5_sGPohQ/exec";
+const TOKEN = "2748";
+
+const SUBJECTS = [
+  { id:1,  name:"Trade Logistics & Global Sourcing",   code:"TL-101" },
+  { id:2,  name:"International Business Strategy",      code:"IB-201" },
+  { id:3,  name:"Corporate Governance & Ethics",        code:"CG-301" },
+  { id:4,  name:"International Brand Management",       code:"BM-202" },
+  { id:5,  name:"International Finance",                code:"IF-401" },
+  { id:6,  name:"ITOD",                                 code:"IT-102" },
+  { id:7,  name:"International Business Negotiations",  code:"BN-303" },
+  { id:8,  name:"Trade Analytics",                      code:"TA-204" },
+  { id:9,  name:"Mergers & Acquisitions",               code:"MA-402" },
+  { id:10, name:"Machine Learning & AI",                code:"ML-501" },
+  { id:11, name:"Digital Marketing",                    code:"DM-205" },
+  { id:12, name:"Sectorial Strategies",                 code:"SS-306" },
+  { id:13, name:"Global Leadership Strategy",           code:"GL-403" },
+];
+
+const ACTIONS = [
+  { id:"material", icon:"ti-folder-open",  iconBg:"var(--accent-bg)",  iconColor:"var(--accent)",  title:"Course material",   desc:"Slides, readings, and resources" },
+  { id:"upload",   icon:"ti-upload",       iconBg:"var(--green-bg)",   iconColor:"var(--green)",   title:"Upload assignment",  desc:"Submit your work to Drive" },
+  { id:"notes",    icon:"ti-notes",        iconBg:"var(--amber-bg)",   iconColor:"var(--amber)",   title:"Lecture notes",      desc:"Shared notes and references" },
+  { id:"syllabus", icon:"ti-list-details", iconBg:"var(--purple-bg)",  iconColor:"var(--purple)",  title:"Syllabus & schedule",desc:"Course plan and calendar" },
+];
+
+const TYPE_META = {
+  deadline: { label:"Deadline", icon:"ti-clock",       iconClass:"deadline", badgeClass:"badge-red" },
+  exam:     { label:"Exam",     icon:"ti-school",      iconClass:"exam",     badgeClass:"badge-amber" },
+  quiz:     { label:"Quiz",     icon:"ti-pencil",      iconClass:"quiz",     badgeClass:"badge-purple" },
+  info:     { label:"Info",     icon:"ti-info-circle", iconClass:"info",     badgeClass:"badge-blue" },
+};
+
+let announcements    = [];
+let driveLinks       = {};
+let currentSubjectId = null;
+let isAdmin          = false;
+
+/* ── Admin session ── */
+function setAdminMode(val) {
+  isAdmin = val;
+  document.getElementById("admin-bar").classList.toggle("show", val);
+  document.getElementById("admin-toggle-btn").classList.toggle("active-admin", val);
+  if (currentSubjectId) showSubject(currentSubjectId);
+}
+function logoutAdmin() {
+  isAdmin = false;
+  document.getElementById("admin-panel").classList.remove("open");
+  setAdminMode(false);
+}
+
+/* ── Countdown helpers ── */
+function daysUntil(dateStr) {
+  if (!dateStr) return null;
+  const target = new Date(dateStr);
+  if (isNaN(target)) return null;
+  target.setHours(23,59,59,0);
+  return Math.ceil((target - new Date()) / 86400000);
+}
+function countdownPill(days, type) {
+  if (type === "info" || days === null) return "";
+  if (days < 0)   return `<span class="countdown-pill pill-past">Passed</span>`;
+  if (days === 0)  return `<span class="countdown-pill pill-urgent">Due today!</span>`;
+  if (days <= 3)   return `<span class="countdown-pill pill-urgent">${days}d left</span>`;
+  if (days <= 7)   return `<span class="countdown-pill pill-soon">${days}d left</span>`;
+  if (days <= 14)  return `<span class="countdown-pill pill-upcoming">${days}d left</span>`;
+  return `<span class="countdown-pill pill-future">${days}d left</span>`;
+}
+function urgencyClass(days, type) {
+  if (type==="info"||days===null) return "";
+  if (days<=3)  return "urgent";
+  if (days<=7)  return "soon";
+  if (days<=14) return "upcoming";
+  return "";
+}
+function formatDate(dateStr) {
+  if (!dateStr) return "";
+  const d = new Date(dateStr);
+  if (isNaN(d)) return dateStr;
+  return d.toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"});
+}
+
+/* ── Toast ── */
+function showToast(msg, loading=false) {
+  const t = document.getElementById("toast");
+  t.innerHTML = (loading?`<div class="spinner"></div>`:`<i class="ti ti-check"></i>`) + ` ${msg}`;
+  t.classList.add("show");
+  if (!loading) setTimeout(()=>t.classList.remove("show"), 2800);
+}
+function hideToast() { document.getElementById("toast").classList.remove("show"); }
+
+
+/* ── API ── */
+async function apiFetch(params) {
+  const url = API + "?" + new URLSearchParams({...params, token: TOKEN});
+  const res  = await fetch(url);
+  const text = await res.text();
+  try { return JSON.parse(text); }
+  catch(e) { throw new Error("Bad response: " + text.slice(0, 100)); }
+}
+
+function apiPost(params) {
+  return new Promise((resolve, reject) => {
+    const cbName = "_cb" + Date.now();
+    const url = API + "?" + new URLSearchParams({...params, token: TOKEN, callback: cbName});
+    let done = false;
+
+    window[cbName] = function(data) {
+      done = true;
+      delete window[cbName];
+      if (script.parentNode) script.parentNode.removeChild(script);
+      resolve(data);
+    };
+
+    const script = document.createElement("script");
+    script.src = url;
+    script.onerror = () => {
+      if (!done) { delete window[cbName]; reject(new Error("Load failed")); }
+    };
+    // Fallback: if callback never fires but no error, assume success after 4s
+    setTimeout(() => {
+      if (!done) { done = true; delete window[cbName]; resolve({ success: true }); }
+    }, 4000);
+    document.body.appendChild(script);
+  });
+}
+
+
+/* ── Load data ── */
+async function loadAnnouncements() {
+  try {
+    const data = await apiFetch({action:"getAnnouncements"});
+    if (data.error) throw new Error(data.error);
+    announcements = Array.isArray(data) ? data : [];
+    renderAnnouncements(); updateStats();
+  } catch(e) {
+    document.getElementById("announcements-container").innerHTML =
+      `<div class="loading-bar" style="color:var(--red);">Could not load announcements. Check your internet connection.</div>`;
+  }
+}
+async function loadDriveLinks() {
+  try {
+    const data = await apiFetch({action:"getDriveLinks"});
+    driveLinks = {};
+    if (data && !data.error) {
+      Object.keys(data).forEach(k => {
+        driveLinks[k] = data[k];
+        driveLinks[Number(k)] = data[k];
+      });
+    }
+  } catch(e) { driveLinks={}; }
+}
+
+/* ── Render announcements ── */
+function renderAnnouncements() {
+  const cont = document.getElementById("announcements-container");
+  const active = announcements.filter(a => {
+    const d = daysUntil(a.date);
+    return d===null || d>=0 || a.type==="info";
+  }).sort((a,b)=>{
+    const da=daysUntil(a.date), db=daysUntil(b.date);
+    if (da===null&&db===null) return 0;
+    if (da===null) return 1; if (db===null) return -1;
+    return da-db;
+  });
+  if (!active.length) {
+    cont.innerHTML=`<div style="padding:20px;text-align:center;color:var(--text3);font-size:14px;background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius);">No active announcements</div>`;
+    return;
+  }
+  cont.innerHTML = active.map(a=>{
+    const m=TYPE_META[a.type]||TYPE_META.info;
+    const days=daysUntil(a.date);
+    return `<div class="announcement-card ${urgencyClass(days,a.type)}">
+      <div class="ann-icon ${a.type}"><i class="ti ${m.icon}" aria-hidden="true"></i></div>
+      <div class="ann-body">
+        <strong>${a.title}</strong>
+        ${a.desc?`<div class="ann-desc">${a.desc}</div>`:""}
+        <div class="ann-footer">
+          ${a.date?`<span class="ann-date-text"><i class="ti ti-calendar-event"></i> ${formatDate(a.date)}</span>`:""}
+          ${countdownPill(days,a.type)}
+        </div>
+      </div>
+      <span class="ann-badge ${m.badgeClass}">${m.label}</span>
+    </div>`;
+  }).join("");
+}
+
+function renderAdminAnnList() {
+  const list = document.getElementById("admin-ann-list");
+  if (!announcements.length) { list.innerHTML=`<p style="font-size:13px;color:var(--text3);">No announcements yet.</p>`; return; }
+  list.innerHTML = announcements.map(a=>`
+    <div class="admin-ann-item">
+      <div style="min-width:0;flex:1;"><p>${a.title}</p><span>${formatDate(a.date)} · ${TYPE_META[a.type]?.label||"Info"}</span></div>
+      <button class="delete-ann" onclick="deleteAnn('${a.id}')" title="Remove"><i class="ti ti-x"></i></button>
+    </div>`).join("");
+}
+
+function updateStats() {
+  document.getElementById("pending-count").textContent = announcements.filter(a=>a.type==="deadline"&&(daysUntil(a.date)??1)>=0).length;
+  document.getElementById("exam-count").textContent    = announcements.filter(a=>a.type==="exam"    &&(daysUntil(a.date)??1)>=0).length;
+  document.getElementById("quiz-count").textContent    = announcements.filter(a=>a.type==="quiz"    &&(daysUntil(a.date)??1)>=0).length;
+}
+
+/* ── Add / Delete ── */
+async function addAnnouncement() {
+  const title=document.getElementById("ann-title").value.trim();
+  const desc =document.getElementById("ann-desc").value.trim();
+  const date =document.getElementById("ann-date").value;
+  const type =document.getElementById("ann-type").value;
+  if (!title||!date){alert("Please fill in at least a title and date.");return;}
+  const btn=document.getElementById("ann-add-btn"); btn.disabled=true;
+  showToast("Saving announcement…",true);
+  const id=Date.now();
+  try {
+    const res=await apiPost({ action:"addAnnouncement", id, title, desc, date, type });
+    if(res.error) throw new Error(res.error);
+    announcements.push({id,title,desc,date,type});
+    renderAnnouncements(); renderAdminAnnList(); updateStats();
+    document.getElementById("ann-title").value="";
+    document.getElementById("ann-desc").value="";
+    document.getElementById("ann-date").value="";
+    hideToast(); showToast("Announcement added — visible to all students");
+  } catch(e){hideToast();alert("Failed to save. "+e.message);}
+  btn.disabled=false;
+}
+
+async function deleteAnn(id) {
+  if(!confirm("Remove this announcement?")) return;
+  showToast("Removing…",true);
+  try {
+    await apiPost({action:"deleteAnnouncement",id});
+    announcements=announcements.filter(a=>String(a.id)!==String(id));
+    renderAnnouncements(); renderAdminAnnList(); updateStats();
+    hideToast(); showToast("Announcement removed");
+  } catch(e){hideToast();alert("Failed to remove.");}
+}
+
+/* ── Drive links ── */
+async function saveDriveLinks() {
+  if(!currentSubjectId) return;
+  const material = document.getElementById("drive-material")?.value.trim()||"";
+  const upload   = document.getElementById("drive-upload")?.value.trim()||"";
+  const notes    = document.getElementById("drive-notes")?.value.trim()||"";
+  const syllabus = document.getElementById("drive-syllabus")?.value.trim()||"";
+  const btn=document.getElementById("drive-save-btn"); btn.disabled=true;
+  showToast("Saving Drive links…",true);
+  try {
+    const res = await apiPost({ action:"saveDriveLinks", subjectId:String(currentSubjectId), material, upload, notes, syllabus });
+    if(res && res.error) throw new Error(res.error);
+    driveLinks[currentSubjectId]={ material, upload, notes, syllabus };
+    driveLinks[String(currentSubjectId)]={ material, upload, notes, syllabus };
+    showSubject(currentSubjectId);
+    hideToast(); showToast("Drive links saved — live for all students");
+  } catch(e){hideToast();alert("Failed to save: "+e.message);}
+  btn.disabled=false;
+}
+
+/* ── Sidebar ── */
+function renderSidebar() {
+  document.getElementById("subject-list").innerHTML=SUBJECTS.map(s=>
+    `<button class="subject-btn" id="sb-${s.id}" onclick="showSubject(${s.id})">
+      <span class="subject-num">${String(s.id).padStart(2,"0")}</span>${s.name}
+    </button>`).join("");
+}
+
+/* ── Views ── */
+function showHome() {
+  document.getElementById("home-view").classList.remove("hidden");
+  document.getElementById("subject-view").classList.remove("visible");
+  document.querySelectorAll(".subject-btn").forEach(b=>b.classList.remove("active"));
+  currentSubjectId=null;
+  loadAnnouncements();
+}
+
+function showSubject(id) {
+  currentSubjectId = Number(id);
+  const s=SUBJECTS.find(x=>x.id===currentSubjectId);
+  document.getElementById("home-view").classList.add("hidden");
+  document.getElementById("subject-view").classList.add("visible");
+  document.getElementById("subject-title").textContent=s.name;
+  document.getElementById("subject-code").textContent=s.code;
+  document.querySelectorAll(".subject-btn").forEach(b=>b.classList.remove("active"));
+  document.getElementById(`sb-${currentSubjectId}`).classList.add("active");
+
+  const links=driveLinks[currentSubjectId]||driveLinks[String(currentSubjectId)]||{};
+
+  // Action cards
+  document.getElementById("action-grid").innerHTML=ACTIONS.map(a=>{
+    const hasLink = !!(links[a.id]);
+    const disabled = !hasLink && !isAdmin ? "disabled" : "";
+    const tooltip  = !hasLink && !isAdmin ? " title='Link not available yet'" : "";
+    return `<div class="action-card ${disabled}" ${tooltip} onclick="${disabled?"":`openAction('${a.id}',${currentSubjectId})`}">
+      <div class="card-icon" style="background:${a.iconBg};color:${a.iconColor};"><i class="ti ${a.icon}" aria-hidden="true"></i></div>
+      <div><h3>${a.title}</h3><p>${a.desc}${!hasLink&&isAdmin?' <em style="color:var(--text3);font-size:11px;">(no link set)</em>':''}</p></div>
+      ${!disabled?`<i class="ti ti-chevron-right card-arrow" aria-hidden="true"></i>`:""}
+    </div>`;
+  }).join("");
+
+  // Admin-only drive config
+  const cfg=document.getElementById("drive-config-section");
+  if (isAdmin) {
+    cfg.style.display="block";
+    document.getElementById("drive-inputs").innerHTML=[
+      {key:"material",label:"Course material folder"},
+      {key:"upload",  label:"Assignment submission folder"},
+      {key:"notes",   label:"Lecture notes folder"},
+      {key:"syllabus",label:"Syllabus / schedule folder"},
+    ].map(f=>`<div class="drive-row">
+      <label>${f.label}</label>
+      <input type="url" id="drive-${f.key}" placeholder="https://drive.google.com/drive/folders/..." value="${links[f.key]||""}">
+    </div>`).join("");
+  } else {
+    cfg.style.display="none";
+  }
+}
+
+function openAction(actionId, subjectId) {
+  const links=driveLinks[subjectId]||{};
+  const url=links[actionId]||"";
+
+  if (actionId==="upload") {
+    const linkEl=document.getElementById("modal-upload-link");
+    if (url) { linkEl.href=url; linkEl.classList.remove("not-set"); }
+    else     { linkEl.href="#"; linkEl.classList.add("not-set"); linkEl.innerHTML=`<i class="ti ti-brand-google-drive"></i> Folder not set yet`; }
+    document.getElementById("upload-area-click").onclick=()=>{ document.getElementById("file-input").click(); };
+    document.getElementById("modal-upload").classList.add("open");
+    return;
+  }
+
+  const action=ACTIONS.find(a=>a.id===actionId);
+  const linkEl=document.getElementById("modal-folder-link");
+  document.getElementById("modal-folder-title").innerHTML=`<i class="ti ${action.icon}" style="vertical-align:-2px;margin-right:6px"></i>${action.title}`;
+  document.getElementById("modal-folder-desc").textContent=action.desc;
+  if (url) { linkEl.href=url; linkEl.classList.remove("not-set"); linkEl.innerHTML=`<i class="ti ti-brand-google-drive"></i> Open in Google Drive`; }
+  else     { linkEl.href="#"; linkEl.classList.add("not-set"); linkEl.innerHTML=`<i class="ti ti-brand-google-drive"></i> Link not available yet`; }
+  document.getElementById("modal-folder").classList.add("open");
+}
+
+function closeModal(id) { document.getElementById(id).classList.remove("open"); }
+
+function handleFileSelect(e) {
+  const file=e.target.files[0]; if(!file) return;
+  const url=(driveLinks[currentSubjectId]||{}).upload||"";
+  if (url) { window.open(url,"_blank"); closeModal("modal-upload"); }
+  else     { alert(`"${file.name}" selected.\nNo Drive submission folder is set for this subject yet.`); }
+}
+
+/* ── Admin toggle ── */
+function toggleAdmin() {
+  const panel=document.getElementById("admin-panel");
+  if (panel.classList.contains("open")) { panel.classList.remove("open"); return; }
+  if (!isAdmin) {
+    const pwd=prompt("Enter admin password:");
+    if (pwd==="TryE=mc2") { setAdminMode(true); panel.classList.add("open"); renderAdminAnnList(); }
+    else if (pwd!==null)  { alert("Incorrect password."); }
+  } else {
+    panel.classList.add("open"); renderAdminAnnList();
+  }
+}
+
+document.querySelectorAll(".modal-overlay").forEach(o=>{
+  o.addEventListener("click",function(e){if(e.target===this)this.classList.remove("open");});
+});
+
+async function init() {
+  document.getElementById("date-display").textContent=new Date().toLocaleDateString("en-GB",{weekday:"long",year:"numeric",month:"long",day:"numeric"});
+  renderSidebar();
+  await Promise.all([loadAnnouncements(),loadDriveLinks()]);
+}
+init();
+</script>
+</body>
+</html>
